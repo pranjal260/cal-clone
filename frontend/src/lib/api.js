@@ -1,8 +1,10 @@
 import axios from "axios";
 
-// API base URL: uses env var if set, otherwise defaults to production
+// API base URL — production default, can override via env for local dev
 const PRODUCTION_API = "https://cal-clone-h445.onrender.com/api";
-const rawUrl = process.env.NEXT_PUBLIC_API_URL || PRODUCTION_API;
+const envUrl = process.env.NEXT_PUBLIC_API_URL;
+// Use env var only for local development (localhost), otherwise use production
+const rawUrl = envUrl && envUrl.includes("localhost") ? envUrl : PRODUCTION_API;
 const API_BASE = rawUrl.endsWith("/api") ? rawUrl : `${rawUrl}/api`;
 
 const api = axios.create({
