@@ -1,6 +1,3 @@
-// Default user ID from seed data
-export const DEFAULT_USER_ID = "26006514-2939-425c-ba15-df9ac3af05b7";
-
 export const DAY_NAMES = [
   "Sunday",
   "Monday",
@@ -55,7 +52,7 @@ export const TIMEZONES = [
   "Pacific/Auckland",
 ];
 
-// Color map for event type cards
+// Color map for event type cards (Cal.com-inspired)
 export const EVENT_COLORS = [
   "#4f46e5", // indigo
   "#0891b2", // cyan

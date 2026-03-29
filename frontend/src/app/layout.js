@@ -1,5 +1,6 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { UserProvider } from "@/lib/userContext";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -10,13 +11,16 @@ const inter = Inter({
 export const metadata = {
   title: "CalClone — Scheduling Platform",
   description:
-    "A scheduling and booking platform. Create event types, set availability, and let others book time slots.",
+    "A scheduling and booking platform inspired by Cal.com. Create event types, set availability, and let others book time slots.",
+  keywords: ["scheduling", "booking", "calendar", "cal.com", "meetings"],
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${inter.variable} h-full`}>
-      <body className="min-h-full flex flex-col antialiased">{children}</body>
+      <body className="min-h-full antialiased">
+        <UserProvider>{children}</UserProvider>
+      </body>
     </html>
   );
 }

@@ -122,3 +122,29 @@ export const updateUser = async (req, res) => {
     });
   }
 };
+
+export const getDefaultUser = async (_req, res) => {
+  try {
+    const user = await prisma.user.findFirst({
+      orderBy: { createdAt: "asc" },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "No users found. Please run the database seed.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: user,
+    });
+  } catch (error) {
+    console.error("Error fetching default user:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};

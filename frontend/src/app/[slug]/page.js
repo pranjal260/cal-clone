@@ -24,23 +24,47 @@ export default function PublicBookingPage({ params }) {
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [eventError, setEventError] = useState(null);
+  const [eventLoading, setEventLoading] = useState(true);
   const [bookingData, setBookingData] = useState(null);
 
   // Fetch event data
   useEffect(() => {
     const fetchEvent = async () => {
+      setEventLoading(true);
+      setEventError(null);
       try {
         const res = await getEventBySlug(slug);
+        
+        if (!res.data) {
+          setEventError("Event not found");
+          setEvent(null);
+          return;
+        }
+        
         setEvent(res.data);
 
         // Fetch availability to know which days are open
         if (res.data?.userId) {
-          const availRes = await getAvailability(res.data.userId);
-          const days = (availRes.data || []).map((a) => a.dayOfWeek);
-          setAvailableDays(days);
+          try {
+            const availRes = await getAvailability(res.data.userId);
+            const days = (availRes.data || []).map((a) => a.dayOfWeek);
+            setAvailableDays(days);
+          } catch (availErr) {
+            console.error("Failed to fetch availability:", availErr);
+            setAvailableDays([]);
+          }
         }
       } catch (err) {
-        console.error(err);
+        console.error("Failed to fetch event:", err);
+        if (err.response?.status === 404) {
+          setEventError("Event not found. Please check the URL.");
+        } else {
+          setEventError("Failed to load event. Please try again later.");
+        }
+        setEvent(null);
+      } finally {
+        setEventLoading(false);
       }
     };
     fetchEvent();
@@ -52,15 +76,24 @@ export default function PublicBookingPage({ params }) {
       if (!event?.id || !date) return;
       setSlotsLoading(true);
       setSelectedSlot(null);
+      setError("");
       try {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
         const dateStr = `${year}-${month}-${day}`;
         const res = await getAvailableSlots(event.id, dateStr);
-        setSlots(res.slots || []);
+        
+        if (!res.slots || res.slots.length === 0) {
+          setError("No available slots for this date. Please try another date.");
+          setSlots([]);
+        } else {
+          setSlots(res.slots);
+          setError("");
+        }
       } catch (err) {
-        console.error(err);
+        console.error("Failed to fetch slots:", err);
+        setError("Failed to load available slots. Please try again.");
         setSlots([]);
       } finally {
         setSlotsLoading(false);
@@ -83,14 +116,37 @@ export default function PublicBookingPage({ params }) {
     e.preventDefault();
     setError("");
 
-    if (!name.trim() || !email.trim()) {
-      setError("Name and email are required");
+    // Trim inputs
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
+
+    // Validate name
+    if (!trimmedName) {
+      setError("Name is required");
+      return;
+    }
+    if (trimmedName.length < 2) {
+      setError("Name must be at least 2 characters");
+      return;
+    }
+    if (trimmedName.length > 100) {
+      setError("Name must be less than 100 characters");
       return;
     }
 
-    // Basic email validation
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    // Validate email
+    if (!trimmedEmail) {
+      setError("Email is required");
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
       setError("Please enter a valid email address");
+      return;
+    }
+
+    if (!selectedSlot) {
+      setError("Please select a time slot");
       return;
     }
 
@@ -98,8 +154,8 @@ export default function PublicBookingPage({ params }) {
     try {
       const res = await createBooking({
         eventTypeId: event.id,
-        name: name.trim(),
-        email: email.trim(),
+        name: trimmedName,
+        email: trimmedEmail,
         startTime: selectedSlot.startTime,
         endTime: selectedSlot.endTime,
       });
@@ -112,7 +168,14 @@ export default function PublicBookingPage({ params }) {
       });
       setStep("confirmed");
     } catch (err) {
-      setError(err.response?.data?.message || "Booking failed. Please try again.");
+      console.error("Booking error:", err);
+      if (err.response?.status === 409) {
+        setError("This time slot has already been booked. Please select another.");
+      } else if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else {
+        setError("Booking failed. Please try again.");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -136,12 +199,35 @@ export default function PublicBookingPage({ params }) {
   };
 
   // Loading state
-  if (!event) {
+  if (eventLoading) {
     return (
       <div className="min-h-screen bg-accent flex items-center justify-center">
         <div className="text-center">
           <div className="w-10 h-10 border-2 border-foreground border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <p className="text-sm text-muted-foreground">Loading...</p>
+          <p className="text-sm text-muted-foreground">Loading event...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state - event not found or failed to load
+  if (eventError || !event) {
+    return (
+      <div className="min-h-screen bg-accent flex items-center justify-center p-4">
+        <div className="bg-white border border-red-200 rounded-2xl shadow-sm w-full max-w-md p-8 text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-5">
+            <span className="text-2xl">❌</span>
+          </div>
+          <h1 className="text-xl font-bold mb-2 text-red-600">Event Not Found</h1>
+          <p className="text-sm text-muted-foreground mb-6">
+            {eventError || "The event you're looking for doesn't exist or has been deleted."}
+          </p>
+          <a
+            href="/"
+            className="inline-block px-5 py-2.5 text-sm font-medium bg-foreground text-white rounded-lg hover:bg-gray-800 transition-colors"
+          >
+            Go Back Home
+          </a>
         </div>
       </div>
     );

@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { getBookingsByUser, cancelBooking } from "@/lib/api";
-import { DEFAULT_USER_ID } from "@/lib/constants";
+import { useUser } from "@/lib/userContext";
 
 const TABS = [
   { key: "upcoming", label: "Upcoming" },
@@ -21,6 +21,7 @@ const TABS = [
 ];
 
 export default function BookingsPage() {
+  const { user } = useUser();
   const [activeTab, setActiveTab] = useState("upcoming");
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,15 +29,16 @@ export default function BookingsPage() {
   const [cancelling, setCancelling] = useState(false);
 
   const fetchBookings = useCallback(async () => {
+    if (!user?.id) return;
     try {
-      const res = await getBookingsByUser(DEFAULT_USER_ID);
+      const res = await getBookingsByUser(user.id);
       setBookings(res.data || []);
     } catch (err) {
       console.error("Failed to fetch bookings:", err);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user?.id]);
 
   useEffect(() => {
     fetchBookings();

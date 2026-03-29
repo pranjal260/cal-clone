@@ -10,12 +10,31 @@ export const createBooking = async (req, res) => {
   try {
     const { eventTypeId, startTime, endTime, name, email } = req.body;
 
-    // 🔹 1. Validation
+    // 🔹 1. Validation - Required fields
     if (!eventTypeId || !startTime || !endTime || !name || !email) {
       return res.status(400).json({
         success: false,
         message:
           "Missing required fields: eventTypeId, startTime, endTime, name, email",
+      });
+    }
+
+    // 🔹 1.1 Validate name
+    const trimmedName = String(name).trim();
+    if (trimmedName.length < 2 || trimmedName.length > 100) {
+      return res.status(400).json({
+        success: false,
+        message: "Name must be between 2 and 100 characters",
+      });
+    }
+
+    // 🔹 1.2 Validate email
+    const trimmedEmail = String(email).trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid email address",
       });
     }
 
@@ -116,8 +135,8 @@ export const createBooking = async (req, res) => {
           eventTypeId,
           startTime: start,
           endTime: end,
-          name,
-          email,
+          name: trimmedName,
+          email: trimmedEmail,
         },
       });
     });

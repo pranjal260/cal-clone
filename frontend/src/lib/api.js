@@ -1,11 +1,24 @@
 import axios from "axios";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+// Smart API base URL: handles both with and without /api suffix
+const rawUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API_BASE = rawUrl.endsWith("/api") ? rawUrl : `${rawUrl}/api`;
 
 const api = axios.create({
   baseURL: API_BASE,
   headers: { "Content-Type": "application/json" },
+  timeout: 15000,
 });
+
+// ─── Users ───────────────────────────────────────────────
+export const getDefaultUser = () =>
+  api.get("/users/default").then((r) => r.data);
+
+export const getUser = (id) =>
+  api.get(`/users/${id}`).then((r) => r.data);
+
+export const updateUser = (id, data) =>
+  api.patch(`/users/${id}`, data).then((r) => r.data);
 
 // ─── Event Types ─────────────────────────────────────────
 export const getEventTypes = (userId) =>
@@ -49,12 +62,5 @@ export const getBookingsByUser = (userId) =>
 
 export const cancelBooking = (id) =>
   api.patch(`/bookings/${id}/cancel`).then((r) => r.data);
-
-// ─── Users ───────────────────────────────────────────────
-export const getUser = (id) =>
-  api.get(`/users/${id}`).then((r) => r.data);
-
-export const updateUser = (id, data) =>
-  api.patch(`/users/${id}`, data).then((r) => r.data);
 
 export default api;

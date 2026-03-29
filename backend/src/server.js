@@ -11,28 +11,43 @@ dotenv.config();
 
 const app = express();
 
-// Middleware
-app.use(cors());
+// ─── CORS — allow the Vercel frontend + localhost ──────────
+const allowedOrigins = [
+  "https://cal-clone-inwv.vercel.app",
+  "http://localhost:3000",
+  "http://localhost:3001",
+];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g., curl, Postman, server-side)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      // Also allow any *.vercel.app subdomain in case of preview deployments
+      if (origin.endsWith(".vercel.app")) {
+        return callback(null, true);
+      }
+      return callback(null, true); // allow all for now during development
+    },
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
-// Health check route
-app.get("/", (req, res) => {
-  res.send("API is running...");
+// Health check
+app.get("/", (_req, res) => {
+  res.json({ status: "ok", message: "Cal.com Clone API is running" });
 });
 
-// User routes
+// Routes
 app.use("/api/users", userRoutes);
-
-// Event routes
 app.use("/api/events", eventRoutes);
-
-// Availability routes
 app.use("/api/availability", availabilityRoutes);
-
-// Slot routes
 app.use("/api/slots", slotRoutes);
-
-// Booking routes
 app.use("/api/bookings", bookingRoutes);
 
 const PORT = process.env.PORT || 5000;

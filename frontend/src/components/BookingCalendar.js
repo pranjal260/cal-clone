@@ -19,45 +19,29 @@ export default function BookingCalendar({
   const [viewYear, setViewYear] = useState(today.getFullYear());
 
   const prevMonth = () => {
-    if (viewMonth === 0) {
-      setViewMonth(11);
-      setViewYear(viewYear - 1);
-    } else {
-      setViewMonth(viewMonth - 1);
-    }
+    if (viewMonth === 0) { setViewMonth(11); setViewYear(viewYear - 1); }
+    else { setViewMonth(viewMonth - 1); }
   };
 
   const nextMonth = () => {
-    if (viewMonth === 11) {
-      setViewMonth(0);
-      setViewYear(viewYear + 1);
-    } else {
-      setViewMonth(viewMonth + 1);
-    }
+    if (viewMonth === 11) { setViewMonth(0); setViewYear(viewYear + 1); }
+    else { setViewMonth(viewMonth + 1); }
   };
 
-  // Can't go to past months
   const canGoPrev =
     viewYear > today.getFullYear() ||
     (viewYear === today.getFullYear() && viewMonth > today.getMonth());
 
-  // Generate calendar grid
   const calendarDays = useMemo(() => {
-    const firstDay = new Date(viewYear, viewMonth, 1).getDay(); // 0 = Sunday
+    const firstDay = new Date(viewYear, viewMonth, 1).getDay();
     const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
-
     const days = [];
 
-    // Empty cells before first day
-    for (let i = 0; i < firstDay; i++) {
-      days.push(null);
-    }
+    for (let i = 0; i < firstDay; i++) days.push(null);
 
-    // Days of the month
     for (let d = 1; d <= daysInMonth; d++) {
       const date = new Date(viewYear, viewMonth, d);
       date.setHours(0, 0, 0, 0);
-
       const dayOfWeek = date.getDay();
       const isPast = date < today;
       const isAvailable = !isPast && availableDays.includes(dayOfWeek);
@@ -65,14 +49,7 @@ export default function BookingCalendar({
       const isSelected =
         selectedDate && date.toDateString() === selectedDate.toDateString();
 
-      days.push({
-        day: d,
-        date,
-        isPast,
-        isAvailable,
-        isToday,
-        isSelected,
-      });
+      days.push({ day: d, date, isPast, isAvailable, isToday, isSelected });
     }
 
     return days;
@@ -80,46 +57,41 @@ export default function BookingCalendar({
 
   return (
     <div className="select-none">
-      {/* Month / Year header */}
+      {/* Month/Year header */}
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-[15px]">
+        <h3 className="font-semibold text-sm">
           {MONTH_NAMES[viewMonth]} {viewYear}
         </h3>
         <div className="flex items-center gap-1">
           <button
             onClick={prevMonth}
             disabled={!canGoPrev}
-            className="p-1.5 rounded-md hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            className="p-1 rounded-md hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
           >
-            <ChevronLeft size={18} />
+            <ChevronLeft size={16} />
           </button>
           <button
             onClick={nextMonth}
-            className="p-1.5 rounded-md hover:bg-muted transition-colors"
+            className="p-1 rounded-md hover:bg-muted transition-colors"
           >
-            <ChevronRight size={18} />
+            <ChevronRight size={16} />
           </button>
         </div>
       </div>
 
       {/* Day headers */}
-      <div className="grid grid-cols-7 mb-2">
+      <div className="grid grid-cols-7 mb-1">
         {DAY_SHORT.map((d) => (
-          <div
-            key={d}
-            className="text-center text-xs font-medium text-muted-foreground py-1"
-          >
+          <div key={d} className="text-center text-xs font-medium text-muted-foreground py-1.5">
             {d}
           </div>
         ))}
       </div>
 
       {/* Calendar grid */}
-      <div className="grid grid-cols-7 gap-y-1">
+      <div className="grid grid-cols-7 gap-y-0.5">
         {calendarDays.map((cell, i) => {
-          if (!cell) {
-            return <div key={`empty-${i}`} />;
-          }
+          if (!cell) return <div key={`empty-${i}`} />;
 
           return (
             <button
@@ -128,14 +100,14 @@ export default function BookingCalendar({
               onClick={() => cell.isAvailable && onSelectDate(cell.date)}
               className={`
                 relative w-full aspect-square flex items-center justify-center
-                text-sm rounded-full transition-all duration-150
-                ${
-                  cell.isSelected
-                    ? "bg-foreground text-white font-semibold"
-                    : cell.isAvailable
+                text-sm rounded-full transition-all duration-100
+                ${cell.isSelected
+                  ? "bg-foreground text-white font-medium"
+                  : cell.isAvailable
                     ? "hover:bg-muted font-medium text-foreground cursor-pointer"
                     : "text-gray-300 cursor-not-allowed"
                 }
+                ${cell.isToday && !cell.isSelected ? "font-bold" : ""}
               `}
             >
               {cell.day}
