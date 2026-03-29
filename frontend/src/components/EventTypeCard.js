@@ -27,15 +27,15 @@ export default function EventTypeCard({ event, color, onEdit, onDelete }) {
   };
 
   return (
-    <div className="group relative bg-white border border-border rounded-md hover:border-border-strong transition-all duration-150 animate-fade-in">
-      {/* Color accent */}
+    <div className="group relative bg-white border border-border rounded-md hover:border-border-strong transition-all duration-100 animate-fade-in">
+      {/* Cal.com-style left color accent bar */}
       <div
-        className="absolute top-0 left-0 w-1 h-full rounded-l-md"
+        className="absolute top-0 left-0 w-[5px] h-full rounded-l-md"
         style={{ backgroundColor: color }}
       />
 
-      <div className="pl-5 pr-4 py-3.5 flex items-center justify-between">
-        {/* Left content */}
+      <div className="pl-5 pr-4 py-4 flex items-center justify-between">
+        {/* Content */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-0.5">
             <h3 className="font-medium text-sm text-foreground truncate">
@@ -54,16 +54,15 @@ export default function EventTypeCard({ event, color, onEdit, onDelete }) {
               <Clock size={12} />
               {event.duration}m
             </span>
-            <span className="text-border">|</span>
-            <span className="flex items-center gap-1">
+            <span className="text-border-strong">|</span>
+            <span className="flex items-center gap-1 font-mono text-[11px]">
               /{event.slug}
             </span>
           </div>
         </div>
 
-        {/* Right actions */}
-        <div className="flex items-center gap-1 ml-4 opacity-0 group-hover:opacity-100 transition-opacity">
-          {/* Copy link */}
+        {/* Actions - visible on hover */}
+        <div className="flex items-center gap-1 ml-4 opacity-0 group-hover:opacity-100 transition-opacity duration-100">
           <button
             onClick={handleCopy}
             className="p-1.5 rounded-md hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
@@ -76,7 +75,6 @@ export default function EventTypeCard({ event, color, onEdit, onDelete }) {
             )}
           </button>
 
-          {/* Preview link */}
           <a
             href={`/${event.slug}`}
             target="_blank"
@@ -87,7 +85,6 @@ export default function EventTypeCard({ event, color, onEdit, onDelete }) {
             <ExternalLink size={15} />
           </a>
 
-          {/* More menu */}
           <div className="relative">
             <button
               onClick={() => setShowMenu(!showMenu)}
@@ -112,7 +109,7 @@ export default function EventTypeCard({ event, color, onEdit, onDelete }) {
                   </button>
                   <button
                     onClick={() => { setShowMenu(false); onDelete(event); }}
-                    className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-destructive hover:bg-red-50 transition-colors"
+                    className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-danger hover:bg-danger-light transition-colors"
                   >
                     <Trash2 size={13} />
                     Delete
@@ -123,7 +120,7 @@ export default function EventTypeCard({ event, color, onEdit, onDelete }) {
           </div>
         </div>
 
-        {/* Copy button always visible on mobile */}
+        {/* Mobile copy button always visible */}
         <button
           onClick={handleCopy}
           className="lg:hidden p-1.5 rounded-md hover:bg-muted transition-colors text-muted-foreground ml-2"

@@ -11,7 +11,7 @@ const MONTH_NAMES = [
   "July", "August", "September", "October", "November", "December",
 ];
 
-export default function BookingCalendar({
+export default function BookingCalendarDark({
   availableDays = [],
   selectedDate,
   onSelectDate,
@@ -39,7 +39,6 @@ export default function BookingCalendar({
     viewYear > today.getFullYear() ||
     (viewYear === today.getFullYear() && viewMonth > today.getMonth());
 
-  // Convert JS Sunday=0 day to Monday=0 system for display
   const jsToMondayStart = (jsDay) => (jsDay === 0 ? 6 : jsDay - 1);
 
   const calendarDays = useMemo(() => {
@@ -48,13 +47,12 @@ export default function BookingCalendar({
     const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
     const days = [];
 
-    // Empty cells before first day
     for (let i = 0; i < firstDay; i++) days.push(null);
 
     for (let d = 1; d <= daysInMonth; d++) {
       const date = new Date(viewYear, viewMonth, d);
       date.setHours(0, 0, 0, 0);
-      const dayOfWeek = date.getDay(); // JS day (0=Sunday)
+      const dayOfWeek = date.getDay();
       const isPast = date < today;
       const isAvailable = !isPast && availableDays.includes(dayOfWeek);
       const isToday = date.getTime() === today.getTime();
@@ -69,39 +67,39 @@ export default function BookingCalendar({
 
   return (
     <div className="select-none">
-      {/* Month/Year header - Cal.com style */}
+      {/* Month/Year header */}
       <div className="flex items-center justify-between mb-5">
-        <h3 className="text-base font-semibold">
-          <span className="font-bold">{MONTH_NAMES[viewMonth]}</span>{" "}
-          <span className="text-muted-foreground font-normal">{viewYear}</span>
+        <h3 className="text-base">
+          <span className="font-bold text-white">{MONTH_NAMES[viewMonth]}</span>{" "}
+          <span className="text-[#a1a1a1] font-normal">{viewYear}</span>
         </h3>
         <div className="flex items-center gap-1">
           <button
             onClick={prevMonth}
             disabled={!canGoPrev}
-            className="p-1.5 rounded-md hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            className="p-1.5 rounded-md text-[#a1a1a1] hover:text-white hover:bg-[#262626] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <ChevronLeft size={16} />
           </button>
           <button
             onClick={nextMonth}
-            className="p-1.5 rounded-md hover:bg-muted transition-colors"
+            className="p-1.5 rounded-md text-[#a1a1a1] hover:text-white hover:bg-[#262626] transition-colors"
           >
             <ChevronRight size={16} />
           </button>
         </div>
       </div>
 
-      {/* Day headers - uppercase like Cal.com */}
+      {/* Day headers */}
       <div className="grid grid-cols-7 mb-2">
         {DAY_HEADERS.map((d) => (
-          <div key={d} className="text-center text-xs font-semibold text-muted-foreground py-2 tracking-wide">
+          <div key={d} className="text-center text-xs font-semibold text-[#737373] py-2 tracking-wide">
             {d}
           </div>
         ))}
       </div>
 
-      {/* Calendar grid - Cal.com uses square cells with rounded corners */}
+      {/* Calendar grid */}
       <div className="grid grid-cols-7 gap-[2px]">
         {calendarDays.map((cell, i) => {
           if (!cell) return <div key={`empty-${i}`} className="aspect-square" />;
@@ -115,17 +113,17 @@ export default function BookingCalendar({
                 relative aspect-square flex items-center justify-center
                 text-sm font-medium rounded-md transition-all duration-100
                 ${cell.isSelected
-                  ? "bg-foreground text-white"
+                  ? "bg-white text-black"
                   : cell.isAvailable
-                    ? "bg-muted hover:bg-border-strong text-foreground cursor-pointer"
-                    : "text-border-strong cursor-not-allowed"
+                    ? "bg-[#333333] hover:bg-[#404040] text-white cursor-pointer"
+                    : "text-[#404040] cursor-not-allowed"
                 }
                 ${cell.isToday && !cell.isSelected ? "font-bold" : ""}
               `}
             >
               {cell.day}
               {cell.isToday && !cell.isSelected && (
-                <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-foreground" />
+                <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-white" />
               )}
             </button>
           );
