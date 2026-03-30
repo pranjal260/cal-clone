@@ -143,8 +143,8 @@ export default function PublicBookingPage({ params }) {
   );
 
   if (step === "confirmed" && bookingData) return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="bg-card border border-border rounded-2xl max-w-md w-full p-8 text-center shadow-sm animate-scale-in">
+    <div className="min-h-screen bg-background flex items-center justify-center p-3 sm:p-4">
+      <div className="bg-card border border-border rounded-2xl max-w-md w-full p-5 sm:p-8 text-center shadow-sm animate-scale-in">
         <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
           <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
         </div>
@@ -162,11 +162,11 @@ export default function PublicBookingPage({ params }) {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-5xl mx-auto px-4 py-12">
+      <div className="max-w-5xl mx-auto px-3 sm:px-4 py-6 sm:py-12">
         <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
           <div className="flex flex-col md:flex-row">
             {/* Left panel — event info */}
-            <div className="w-full md:w-80 border-b md:border-b-0 md:border-r border-border p-8">
+            <div className="w-full md:w-80 border-b md:border-b-0 md:border-r border-border p-5 sm:p-8">
               {step === "form" && (
                 <button onClick={() => setStep("calendar")}
                   className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6">
@@ -174,8 +174,8 @@ export default function PublicBookingPage({ params }) {
                 </button>
               )}
 
-              <div className="w-10 h-10 rounded-full mb-5" style={{ backgroundColor: accentColor }} />
-              <h1 className="text-xl font-bold text-foreground">{event.title}</h1>
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full mb-4 sm:mb-5" style={{ backgroundColor: accentColor }} />
+              <h1 className="text-lg sm:text-xl font-bold text-foreground">{event.title}</h1>
               {event.description && <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{event.description}</p>}
 
               <div className="mt-6 space-y-3">
@@ -204,7 +204,7 @@ export default function PublicBookingPage({ params }) {
             </div>
 
             {/* Right panel */}
-            <div className="flex-1 p-8">
+            <div className="flex-1 p-4 sm:p-6 md:p-8">
               {step === "calendar" ? (
                 <div>
                   {/* Month navigation */}

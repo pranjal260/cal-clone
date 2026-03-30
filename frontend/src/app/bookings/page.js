@@ -45,17 +45,17 @@ export default function BookingsPage() {
 
   return (
     <DashboardLayout>
-      <div className="p-8 max-w-5xl">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-foreground">Bookings</h1>
-          <p className="text-muted-foreground mt-1 text-sm">Manage all your scheduled appointments.</p>
+      <div className="p-4 sm:p-6 md:p-8 max-w-5xl">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Bookings</h1>
+          <p className="text-muted-foreground mt-1 text-sm hidden sm:block">Manage all your scheduled appointments.</p>
         </div>
 
         {/* Tabs */}
         <div className="flex gap-1 border-b border-border mb-6">
           {tabs.map((tab) => (
             <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-              className={`px-4 py-2.5 text-sm font-medium transition-colors relative
+              className={`px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium transition-colors relative
                 ${activeTab === tab.key
                   ? "text-foreground after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary"
                   : "text-muted-foreground hover:text-foreground"
@@ -87,17 +87,17 @@ export default function BookingsPage() {
         ) : (
           <div className="bg-card border border-border rounded-xl overflow-hidden">
             {currentBookings.map((b) => (
-              <div key={b.id} className="flex items-center gap-4 p-4 border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
+              <div key={b.id} className="flex flex-wrap sm:flex-nowrap items-start sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
                 {/* Avatar */}
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm shrink-0">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-xs sm:text-sm shrink-0">
                   {b.name?.charAt(0).toUpperCase() || "?"}
                 </div>
 
                 {/* Name + email */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="font-medium text-foreground text-sm">{b.name}</p>
-                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium
+                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                    <p className="font-medium text-foreground text-sm truncate">{b.name}</p>
+                    <span className={`inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded-full text-xs font-medium
                       ${b.status === "cancelled"
                         ? "bg-red-100 text-red-700"
                         : "bg-green-100 text-green-700"
@@ -110,12 +110,17 @@ export default function BookingsPage() {
                   </div>
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <Mail className="w-3 h-3 text-muted-foreground" />
-                    <p className="text-xs text-muted-foreground">{b.email}</p>
+                    <p className="text-xs text-muted-foreground truncate">{b.email}</p>
+                  </div>
+                  {/* Mobile date/time - shown only on small screens */}
+                  <div className="flex items-center gap-2 mt-1 sm:hidden text-xs text-muted-foreground">
+                    <Calendar className="w-3 h-3" />
+                    {fmtDate(b.startTime)} · {fmtTime(b.startTime)}
                   </div>
                 </div>
 
-                {/* Event info */}
-                <div className="text-right shrink-0">
+                {/* Event info - hidden on very small screens */}
+                <div className="text-right shrink-0 hidden sm:block">
                   <p className="text-sm font-medium text-foreground">{b.eventType?.title || "Event"}</p>
                   <div className="flex items-center gap-1 justify-end mt-0.5">
                     <Clock className="w-3 h-3 text-muted-foreground" />
@@ -123,7 +128,7 @@ export default function BookingsPage() {
                   </div>
                 </div>
 
-                {/* Date/time */}
+                {/* Date/time - hidden on small, shown on md+ */}
                 <div className="text-right shrink-0 hidden md:block">
                   <div className="flex items-center gap-1 text-sm text-foreground">
                     <Calendar className="w-3.5 h-3.5 text-muted-foreground" />

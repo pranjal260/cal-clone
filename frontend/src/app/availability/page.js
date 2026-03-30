@@ -61,10 +61,10 @@ export default function AvailabilityPage() {
 
   return (
     <DashboardLayout>
-      <div className="p-8 max-w-3xl">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-foreground">Availability</h1>
-          <p className="text-muted-foreground mt-1 text-sm">Configure the times you are available for bookings.</p>
+      <div className="p-4 sm:p-6 md:p-8 max-w-3xl">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Availability</h1>
+          <p className="text-muted-foreground mt-1 text-sm hidden sm:block">Configure the times you are available for bookings.</p>
         </div>
 
         <div className="space-y-6">
@@ -93,7 +93,7 @@ export default function AvailabilityPage() {
                   const s = schedule.find(s => s.dayOfWeek === day.value);
                   if (!s) return null;
                   return (
-                    <div key={day.value} className="flex items-center gap-4 py-2 border-b border-border last:border-0">
+                    <div key={day.value} className="flex items-center gap-2 sm:gap-4 py-2 border-b border-border last:border-0 flex-wrap sm:flex-nowrap">
                       {/* Toggle */}
                       <button type="button" onClick={() => toggleDay(day.value)}
                         className="relative shrink-0 rounded-full transition-colors"
@@ -109,7 +109,7 @@ export default function AvailabilityPage() {
 
                       {/* Time selectors */}
                       {s.enabled ? (
-                        <div className="flex items-center gap-2 flex-1">
+                        <div className="flex items-center gap-2 flex-1 min-w-0 flex-wrap sm:flex-nowrap">
                           <select value={s.startTime} onChange={e => updateTime(day.value, "startTime", e.target.value)}
                             className="px-2.5 py-1.5 border border-input rounded-lg text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring">
                             {TIME_OPTIONS.map(t => <option key={t} value={t}>{fmt(t)}</option>)}

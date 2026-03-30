@@ -16,6 +16,12 @@ export const metadata = {
   keywords: ["scheduling", "booking", "calendar", "cal.com", "meetings"],
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${inter.variable} h-full`}>

@@ -48,22 +48,22 @@ export default function EventTypesPage() {
 
   return (
     <DashboardLayout>
-      <div className="p-8 max-w-5xl">
+      <div className="p-4 sm:p-6 md:p-8 max-w-5xl">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Event Types</h1>
-            <p className="text-muted-foreground mt-1 text-sm">Create events to share for people to book on your calendar.</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground">Event Types</h1>
+            <p className="text-muted-foreground mt-1 text-sm hidden sm:block">Create events to share for people to book on your calendar.</p>
           </div>
           <button onClick={() => { setEditingEvent(null); setModalOpen(true); }}
-            className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors">
+            className="flex items-center justify-center gap-2 bg-primary text-primary-foreground px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors w-full sm:w-auto">
             <Plus className="w-4 h-4" /> New event type
           </button>
         </div>
 
         {/* Cards grid */}
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {[1, 2, 3].map((i) => (
               <div key={i} className="bg-card border border-border rounded-xl p-5 animate-pulse">
                 <div className="h-4 bg-muted rounded w-3/4 mb-2" />
@@ -84,7 +84,7 @@ export default function EventTypesPage() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {events.map((ev, i) => {
               const color = EVENT_COLORS[i % EVENT_COLORS.length];
               return (
