@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { X } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
 import { DURATION_OPTIONS } from "@/lib/constants";
 
 export default function EventTypeModal({ isOpen, onClose, onSubmit, editData = null }) {
@@ -22,7 +22,7 @@ export default function EventTypeModal({ isOpen, onClose, onSubmit, editData = n
     e.preventDefault(); setError("");
     const t = title.trim(), s = slug.trim(), d = description.trim();
     if (!t) { setError("Title is required"); return; }
-    if (!s || !/^[a-z0-9-]+$/.test(s)) { setError("Valid URL slug is required"); return; }
+    if (!s || !/^[a-z0-9-]+$/.test(s)) { setError("Valid URL slug is required (lowercase, hyphens only)"); return; }
     setLoading(true);
     try { await onSubmit({ title: t, slug: s, duration, description: d || null }); onClose(); }
     catch (err) { setError(err.response?.status === 409 ? "Slug already in use" : err.response?.data?.message || "Something went wrong"); }
@@ -33,42 +33,57 @@ export default function EventTypeModal({ isOpen, onClose, onSubmit, editData = n
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-[440px] animate-scale-in border border-[#e5e7eb]" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#e5e7eb]">
-          <h2 className="text-[15px] font-semibold text-[#111827]">{isEdit ? "Edit Event Type" : "Add a new event type"}</h2>
-          <button onClick={onClose} className="p-1 rounded hover:bg-[#f3f4f6] text-[#9ca3af]"><X size={16} /></button>
+      <div className="bg-card rounded-xl shadow-xl w-full max-w-md border border-border animate-scale-in" onClick={e => e.stopPropagation()}>
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+          <h2 className="text-lg font-semibold text-foreground">{isEdit ? "Edit Event Type" : "New Event Type"}</h2>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
+            <X className="w-4 h-4" />
+          </button>
         </div>
+
+        {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
-            <label className="block text-[13px] font-medium text-[#374151] mb-1.5">Title *</label>
-            <input type="text" value={title} onChange={e => handleTitleChange(e.target.value)} placeholder="Quick Chat" className="input-field" autoFocus />
+            <label className="block text-sm font-medium text-foreground mb-1.5">Title <span className="text-destructive">*</span></label>
+            <input type="text" value={title} onChange={e => handleTitleChange(e.target.value)} placeholder="Quick Chat"
+              className="w-full px-3 py-2.5 border border-input rounded-lg text-sm bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" autoFocus />
           </div>
           <div>
-            <label className="block text-[13px] font-medium text-[#374151] mb-1.5">URL *</label>
-            <div className="flex border border-[#e5e7eb] rounded-md overflow-hidden focus-within:border-[#111827] focus-within:shadow-[0_0_0_2px_rgba(17,24,39,0.06)]">
-              <span className="px-3 py-[9px] bg-[#f9fafb] text-[13px] text-[#9ca3af] border-r border-[#e5e7eb]">cal.com/</span>
-              <input type="text" value={slug} onChange={e => setSlug(e.target.value)} placeholder="quick-chat" className="flex-1 px-3 py-[9px] text-[13px] focus:outline-none" />
-            </div>
+            <label className="block text-sm font-medium text-foreground mb-1.5">URL Slug <span className="text-destructive">*</span></label>
+            <input type="text" value={slug} onChange={e => setSlug(e.target.value)} placeholder="quick-chat"
+              className="w-full px-3 py-2.5 border border-input rounded-lg text-sm bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
           </div>
           <div>
-            <label className="block text-[13px] font-medium text-[#374151] mb-1.5">Duration</label>
-            <div className="flex gap-1.5 flex-wrap">
+            <label className="block text-sm font-medium text-foreground mb-1.5">Duration</label>
+            <div className="flex gap-2 flex-wrap">
               {DURATION_OPTIONS.map(o => (
                 <button key={o.value} type="button" onClick={() => setDuration(o.value)}
-                  className={`px-3 py-[6px] text-[13px] rounded-md border transition-colors ${duration === o.value ? "border-[#111827] bg-[#111827] text-white" : "border-[#e5e7eb] text-[#374151] hover:border-[#d1d5db]"}`}>
+                  className={`px-3 py-2 border rounded-lg text-sm font-medium transition-colors
+                    ${duration === o.value
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "border-border text-foreground hover:border-primary hover:text-primary"
+                    }`}>
                   {o.label}
                 </button>
               ))}
             </div>
           </div>
           <div>
-            <label className="block text-[13px] font-medium text-[#374151] mb-1.5">Description</label>
-            <textarea value={description} onChange={e => setDescription(e.target.value)} rows={3} placeholder="A brief description..." className="input-field resize-none" />
+            <label className="block text-sm font-medium text-foreground mb-1.5">Description</label>
+            <textarea value={description} onChange={e => setDescription(e.target.value)} rows={3}
+              placeholder="A brief description of this event type..."
+              className="w-full px-3 py-2.5 border border-input rounded-lg text-sm bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none" />
           </div>
-          {error && <p className="text-[12px] text-[#ef4444] bg-[#fef2f2] px-3 py-2 rounded">{error}</p>}
-          <div className="flex justify-end gap-2.5 pt-1">
-            <button type="button" onClick={onClose} className="btn btn-secondary text-[13px]">Cancel</button>
-            <button type="submit" disabled={loading} className="btn btn-primary text-[13px]">{loading ? "Saving..." : isEdit ? "Save" : "Continue"}</button>
+          {error && <p className="text-sm text-destructive">{error}</p>}
+          <div className="flex justify-end gap-3 pt-2">
+            <button type="button" onClick={onClose}
+              className="px-4 py-2 text-sm font-medium text-foreground bg-secondary rounded-lg hover:bg-secondary/80 transition-colors">Cancel</button>
+            <button type="submit" disabled={loading}
+              className="flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-60">
+              {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+              {loading ? "Saving..." : isEdit ? "Save Changes" : "Create"}
+            </button>
           </div>
         </form>
       </div>

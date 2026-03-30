@@ -1,11 +1,12 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
-import { Plus, Link2, Clock, Copy, Check, ExternalLink, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { Plus, Clock, ExternalLink, MoreVertical, Pencil, Trash2, Link2, Copy, Check } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import EventTypeModal from "@/components/EventTypeModal";
 import { getEventTypes, createEventType, updateEventType, deleteEventType } from "@/lib/api";
 import { useUser } from "@/lib/userContext";
-import { EVENT_COLORS } from "@/lib/constants";
+
+const EVENT_COLORS = ["#3b82f6", "#8b5cf6", "#10b981", "#f59e0b", "#ef4444", "#ec4899", "#06b6d4", "#84cc16"];
 
 export default function EventTypesPage() {
   const { user } = useUser();
@@ -14,7 +15,8 @@ export default function EventTypesPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
-  const [copiedId, setCopiedId] = useState(null);
+  const [openMenu, setOpenMenu] = useState(null);
+  const [copiedSlug, setCopiedSlug] = useState(null);
 
   const fetchEvents = useCallback(async () => {
     if (!user?.id) return;
@@ -29,7 +31,7 @@ export default function EventTypesPage() {
     await createEventType({ ...data, userId: user.id });
     setModalOpen(false); await fetchEvents();
   };
-  const handleEdit = (ev) => { setEditingEvent(ev); setModalOpen(true); };
+  const handleEdit = (ev) => { setEditingEvent(ev); setModalOpen(true); setOpenMenu(null); };
   const handleUpdate = async (data) => {
     await updateEventType(editingEvent.id, { ...data, userId: user.id });
     setEditingEvent(null); setModalOpen(false); await fetchEvents();
@@ -41,85 +43,140 @@ export default function EventTypesPage() {
   };
   const copyLink = (slug) => {
     navigator.clipboard.writeText(`${window.location.origin}/${slug}`);
-    setCopiedId(slug); setTimeout(() => setCopiedId(null), 2000);
+    setCopiedSlug(slug); setTimeout(() => setCopiedSlug(null), 2000);
   };
 
   return (
     <DashboardLayout>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-[22px] font-bold text-[#111827] tracking-tight">Event Types</h1>
-          <p className="text-[13px] text-[#6b7280] mt-0.5">Create events to share for people to book on your calendar.</p>
-        </div>
-        <button onClick={() => { setEditingEvent(null); setModalOpen(true); }} className="btn btn-primary text-[13px]">
-          <Plus size={15} strokeWidth={2.5} /> New
-        </button>
-      </div>
-
-      {loading ? (
-        <div className="space-y-2">{[...Array(3)].map((_, i) => <div key={i} className="skeleton h-[68px]" />)}</div>
-      ) : events.length === 0 ? (
-        <div className="text-center py-20 border border-[#e5e7eb] rounded-lg bg-white">
-          <div className="w-12 h-12 mx-auto mb-3 bg-[#f3f4f6] rounded-full flex items-center justify-center">
-            <Link2 size={20} className="text-[#9ca3af]" />
+      <div className="p-8 max-w-5xl">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Event Types</h1>
+            <p className="text-muted-foreground mt-1 text-sm">Create events to share for people to book on your calendar.</p>
           </div>
-          <h2 className="text-[15px] font-semibold text-[#111827] mb-1">No event types yet</h2>
-          <p className="text-[13px] text-[#6b7280] mb-4">Create your first event type to start receiving bookings.</p>
-          <button onClick={() => { setEditingEvent(null); setModalOpen(true); }} className="btn btn-primary text-[13px]">
-            <Plus size={15} /> New Event Type
+          <button onClick={() => { setEditingEvent(null); setModalOpen(true); }}
+            className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors">
+            <Plus className="w-4 h-4" /> New event type
           </button>
         </div>
-      ) : (
-        <div className="border border-[#e5e7eb] rounded-lg overflow-hidden bg-white divide-y divide-[#e5e7eb]">
-          {events.map((ev, i) => (
-            <div key={ev.id} className="group relative hover:bg-[#fafafa] transition-colors animate-fade-in">
-              <div className="absolute top-0 left-0 w-[4px] h-full" style={{ backgroundColor: EVENT_COLORS[i % EVENT_COLORS.length] }} />
-              <div className="pl-5 pr-4 py-3.5 flex items-center justify-between">
-                <div className="min-w-0 flex-1">
-                  <h3 className="text-[14px] font-medium text-[#111827] truncate">{ev.title}</h3>
-                  {ev.description && <p className="text-[12px] text-[#9ca3af] truncate mt-0.5">{ev.description}</p>}
-                  <div className="flex items-center gap-2.5 mt-1 text-[12px] text-[#9ca3af]">
-                    <span className="flex items-center gap-1"><Clock size={11} />{ev.duration}m</span>
-                    <span className="text-[#e5e7eb]">·</span>
-                    <span className="font-mono text-[11px]">/{ev.slug}</span>
+
+        {/* Cards grid */}
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-card border border-border rounded-xl p-5 animate-pulse">
+                <div className="h-4 bg-muted rounded w-3/4 mb-2" />
+                <div className="h-3 bg-muted rounded w-1/2" />
+              </div>
+            ))}
+          </div>
+        ) : events.length === 0 ? (
+          <div className="text-center py-16 border border-dashed border-border rounded-xl">
+            <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+              <Clock className="w-6 h-6 text-muted-foreground" />
+            </div>
+            <h3 className="font-semibold text-foreground mb-1">No event types yet</h3>
+            <p className="text-sm text-muted-foreground mb-4">Create your first event type to start accepting bookings.</p>
+            <button onClick={() => { setEditingEvent(null); setModalOpen(true); }}
+              className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors">
+              <Plus className="w-4 h-4" /> New event type
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {events.map((ev, i) => {
+              const color = EVENT_COLORS[i % EVENT_COLORS.length];
+              return (
+                <div key={ev.id} className="relative bg-card border border-border rounded-xl p-5 hover:shadow-md transition-shadow group">
+                  <div className="absolute top-0 left-0 w-1.5 h-full rounded-l-xl" style={{ backgroundColor: color }} />
+                  <div className="pl-2">
+                    {/* Title + menu */}
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-foreground text-base leading-tight">{ev.title}</h3>
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground">{ev.duration} minutes</span>
+                        </div>
+                      </div>
+                      <div className="relative">
+                        <button onClick={() => setOpenMenu(openMenu === ev.id ? null : ev.id)}
+                          className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
+                          <MoreVertical className="w-4 h-4" />
+                        </button>
+                        {openMenu === ev.id && (
+                          <>
+                            <div className="fixed inset-0 z-10" onClick={() => setOpenMenu(null)} />
+                            <div className="absolute right-0 top-8 z-20 w-44 bg-card border border-border rounded-xl shadow-lg py-1">
+                              <button onClick={() => handleEdit(ev)}
+                                className="flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-muted text-foreground w-full">
+                                <Pencil className="w-4 h-4" /> Edit
+                              </button>
+                              <button onClick={() => copyLink(ev.slug)}
+                                className="flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-muted text-foreground w-full">
+                                <Copy className="w-4 h-4" /> Copy link
+                              </button>
+                              <a href={`/${ev.slug}`} target="_blank" rel="noopener noreferrer"
+                                className="flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-muted text-foreground">
+                                <ExternalLink className="w-4 h-4" /> Preview
+                              </a>
+                              <hr className="my-1 border-border" />
+                              <button onClick={() => { setDeleteConfirm(ev); setOpenMenu(null); }}
+                                className="flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-muted text-destructive w-full">
+                                <Trash2 className="w-4 h-4" /> Delete
+                              </button>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Description */}
+                    {ev.description && (
+                      <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{ev.description}</p>
+                    )}
+
+                    {/* Footer: slug + view */}
+                    <div className="flex items-center gap-2 mt-4">
+                      <button onClick={() => copyLink(ev.slug)}
+                        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors bg-muted px-2.5 py-1.5 rounded-lg">
+                        <Link2 className="w-3 h-3" />
+                        <span className="truncate max-w-[180px]">{ev.slug}</span>
+                      </button>
+                      <a href={`/${ev.slug}`} target="_blank" rel="noopener noreferrer"
+                        className="ml-auto flex items-center gap-1.5 text-xs text-primary hover:underline">
+                        View <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-0.5 ml-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button onClick={() => copyLink(ev.slug)} className="p-1.5 rounded hover:bg-[#f3f4f6] text-[#9ca3af] hover:text-[#374151]" title="Copy link">
-                    {copiedId === ev.slug ? <Check size={14} className="text-[#059669]" /> : <Copy size={14} />}
-                  </button>
-                  <a href={`/${ev.slug}`} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded hover:bg-[#f3f4f6] text-[#9ca3af] hover:text-[#374151]" title="Preview">
-                    <ExternalLink size={14} />
-                  </a>
-                  <button onClick={() => handleEdit(ev)} className="p-1.5 rounded hover:bg-[#f3f4f6] text-[#9ca3af] hover:text-[#374151]" title="Edit">
-                    <Pencil size={14} />
-                  </button>
-                  <button onClick={() => setDeleteConfirm(ev)} className="p-1.5 rounded hover:bg-[#fef2f2] text-[#9ca3af] hover:text-[#ef4444]" title="Delete">
-                    <Trash2 size={14} />
-                  </button>
-                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Modal */}
+        <EventTypeModal isOpen={modalOpen} onClose={() => { setModalOpen(false); setEditingEvent(null); }}
+          onSubmit={editingEvent ? handleUpdate : handleCreate} editData={editingEvent} />
+
+        {/* Delete confirm */}
+        {deleteConfirm && (
+          <div className="modal-backdrop" onClick={() => setDeleteConfirm(null)}>
+            <div className="bg-card rounded-xl shadow-xl w-full max-w-sm animate-scale-in border border-border p-6" onClick={e => e.stopPropagation()}>
+              <h2 className="text-lg font-semibold text-foreground mb-2">Delete Event Type</h2>
+              <p className="text-sm text-muted-foreground mb-1">Are you sure you want to delete <strong className="text-foreground">{deleteConfirm.title}</strong>?</p>
+              <p className="text-xs text-destructive bg-destructive/10 px-3 py-2 rounded-lg mb-5">This will also delete all associated bookings.</p>
+              <div className="flex justify-end gap-3">
+                <button onClick={() => setDeleteConfirm(null)}
+                  className="px-4 py-2 text-sm font-medium text-foreground bg-secondary rounded-lg hover:bg-secondary/80 transition-colors">Cancel</button>
+                <button onClick={handleDelete}
+                  className="px-4 py-2 text-sm font-medium text-destructive-foreground bg-destructive rounded-lg hover:bg-destructive/90 transition-colors">Delete</button>
               </div>
             </div>
-          ))}
-        </div>
-      )}
-
-      <EventTypeModal isOpen={modalOpen} onClose={() => { setModalOpen(false); setEditingEvent(null); }}
-        onSubmit={editingEvent ? handleUpdate : handleCreate} editData={editingEvent} />
-
-      {deleteConfirm && (
-        <div className="modal-backdrop" onClick={() => setDeleteConfirm(null)}>
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm animate-scale-in border border-[#e5e7eb] p-6" onClick={e => e.stopPropagation()}>
-            <h2 className="text-[16px] font-semibold mb-2">Delete Event Type</h2>
-            <p className="text-[13px] text-[#6b7280] mb-1">Are you sure you want to delete <strong className="text-[#111827]">{deleteConfirm.title}</strong>?</p>
-            <p className="text-[12px] text-[#ef4444] bg-[#fef2f2] px-3 py-2 rounded mb-5">This will also delete all associated bookings.</p>
-            <div className="flex justify-end gap-2.5">
-              <button onClick={() => setDeleteConfirm(null)} className="btn btn-secondary text-[13px]">Cancel</button>
-              <button onClick={handleDelete} className="btn btn-danger text-[13px]">Delete</button>
-            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </DashboardLayout>
   );
 }

@@ -3,11 +3,9 @@ import Sidebar from "./Sidebar";
 
 export default function DashboardLayout({ children }) {
   return (
-    <div className="min-h-screen bg-[#f8f9fa]">
+    <div className="flex min-h-screen bg-background">
       <Sidebar />
-      <main className="lg:ml-[250px] pt-14 lg:pt-0 min-h-screen">
-        <div className="max-w-[960px] mx-auto px-6 py-8">{children}</div>
-      </main>
+      <main className="flex-1 overflow-auto lg:ml-64 pt-14 lg:pt-0">{children}</main>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-// Build v2 — force fresh deploy
+// Build v3 — UI overhaul from Replit
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { UserProvider } from "@/lib/userContext";
@@ -10,9 +10,9 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: "CalClone — Scheduling Platform",
+  title: "Cal - Scheduling Made Simple",
   description:
-    "A scheduling and booking platform inspired by Cal.com. Create event types, set availability, and let others book time slots.",
+    "Book time with professionals, automatically. A scheduling and booking platform inspired by Cal.com.",
   keywords: ["scheduling", "booking", "calendar", "cal.com", "meetings"],
 };
 
